@@ -1,4 +1,10 @@
-﻿using SharpDX;
+﻿//依赖:
+
+//SharpDX.4.2.0
+//SharpDX.Direct2D1.4.2.0
+//SharpDX.DXGI.4.2.0
+
+using SharpDX;
 using SharpDX.Direct2D1;
 using SharpDX.Mathematics.Interop;
 using SharpDX.WIC;
@@ -76,14 +82,10 @@ public partial class DXDrawPad : UserControl
 	ImagingFactory oImagingFactory = new ImagingFactory();
 	WindowRenderTarget oRenderTarget;
 
-	BitmapFrameDecode oFrameBitmap;
-	FormatConverter oFormatConverter;
 	Stream oGdiBmpStream = new MemoryStream();
 
 	Control oInvoke;
 
-    Graphics oGpMain;
-    Bitmap oBmpMain;
     Dictionary<string, ST_DRAW_OBJECT> oDrawObjects = new Dictionary<string, ST_DRAW_OBJECT>();
     int mFpsCount = 0;
     ST_DRAW_OBJECT mObjFPSDraw;

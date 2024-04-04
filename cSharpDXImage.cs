@@ -13,8 +13,6 @@ using static System.Net.Mime.MediaTypeNames;
 
 internal class cSharpDXImage
 {
-	private SharpDX.Direct2D1.Factory2 factory;
-	private WindowRenderTarget renderTarget;
 	ImagingFactory oImagingFactory = new ImagingFactory();
 	RenderTarget oRender;
 
@@ -24,7 +22,6 @@ internal class cSharpDXImage
 	Stream oGdiBmpStream = new MemoryStream();
 
 	Dictionary<int, SharpDX.Direct2D1.Bitmap> oAllFrame = new System.Collections.Generic.Dictionary<int, SharpDX.Direct2D1.Bitmap>();
-	private SharpDX.Direct2D1.Bitmap aImage;
 	int mFrameCount;
 	int mFrameIndex;
 
