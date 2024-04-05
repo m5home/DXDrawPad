@@ -25,8 +25,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using static System.Net.Mime.MediaTypeNames;
-
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 
@@ -274,13 +272,15 @@ public partial class DXDrawPad : UserControl
     /// <returns></returns>
     public bool UpdateDrawObject(ST_DRAW_OBJECT drawObject)
     {
-        if (!oDrawObjects.ContainsKey(drawObject.ObjectName)) { return false; }
-        lock (oDrawObjects)
+        if (oDrawObjects.TryGetValue(drawObject.ObjectName, out var obj))
         {
-            drawObject.RequireConvert = true;
-            oDrawObjects[drawObject.ObjectName] = drawObject;
+            lock (oDrawObjects)
+            {
+                drawObject.RequireConvert = true;
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
     /// <summary>
@@ -307,6 +307,24 @@ public partial class DXDrawPad : UserControl
         yield break;
     }
 
+    /// <summary>
+    /// 移除目标实例。
+    /// </summary>
+    /// <param name="keyName">目标实例的Key</param>
+    /// <returns>成功返回 <c>true</c>, 否则返回 <c>false</c></returns>
+    public bool RemoveDrawObject(string keyName)
+    {
+        if (oDrawObjects.TryGetValue(keyName, out var value))
+        {
+            lock (oDrawObjects)
+            {
+                oDrawObjects.Remove(keyName);
+                value.Dispose();
+            }
+            return true;
+        }
+        return false;
+    }
 
     #region 鼠标事件触发
     private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
