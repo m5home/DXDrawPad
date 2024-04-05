@@ -136,21 +136,19 @@ public partial class DXDrawPad : UserControl
 
     private void DrawObjects()
     {
-        ST_DRAW_OBJECT _item, _FPSItem;
+        ST_DRAW_OBJECT _FPSItem;
 
         #region 绘制用户对象
-        for (int i = 0; i < oDrawObjects.Count; i++)
+        foreach (var item in oDrawObjects)
         {
-            _item = oDrawObjects.Values.ElementAt(i);
-            if (ConvertGDI2DX(ref _item)) { oDrawObjects[_item.ObjectName] = _item; }
+            ConvertGDI2DX(item.Value);
 
-            if (_item.ObjectName != "FPS")
+            if (item.Value.ObjectName != ST_DRAW_OBJECT.FPSKey)
             {
-                oRenderTarget.DrawBitmap(_item.imageDX, _item.RectDX, 1.0f, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
+                oRenderTarget.DrawBitmap(item.Value.imageDX, item.Value.RectDX, 1.0f, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
             }
         }
         #endregion
-
         #region 绘制FPS
         if (mShowFPS)
         {
@@ -160,7 +158,7 @@ public partial class DXDrawPad : UserControl
         #endregion
     }
 
-    private bool ConvertGDI2DX(ref ST_DRAW_OBJECT objItem)
+    private bool ConvertGDI2DX(ST_DRAW_OBJECT objItem)
     {
         #region 更新绘制位置,每次都更新
         objItem.RectDX.Left = objItem.LocationGDI.X;
