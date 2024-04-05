@@ -344,6 +344,8 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
 {
     public static readonly ST_DRAW_OBJECT Default = new();
 
+    public static readonly string FPSKey = Guid.NewGuid().ToString();
+
     public readonly string ObjectName;
     /// <summary>
     /// 当前对象的GDI画布
@@ -395,6 +397,14 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
     public ST_DRAW_OBJECT(string objectName)
     {
         ObjectName = objectName ?? throw new ArgumentNullException(nameof(objectName));
+        if (objectName == string.Empty)
+        {
+            throw new ArgumentException("objectName是空字符串.", nameof(objectName));
+        }
+        if (objectName == FPSKey)
+        {
+            throw new ArgumentException("objectName的值是FPS展示层的Key。", nameof(objectName));
+        }
     }
 
     public override int GetHashCode() => ObjectName.GetHashCode();
