@@ -25,6 +25,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using static System.Net.Mime.MediaTypeNames;
+
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 
@@ -369,7 +371,7 @@ public partial class DXDrawPad : UserControl
     #endregion
 }
 
-public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
+public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>, IDisposable
 {
     /// <summary>
     /// 默认的 <see cref="ST_DRAW_OBJECT"/> 实例。
@@ -422,6 +424,7 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
     /// 当前对象是否需要从GDI转换为DX
     /// </summary>
     public bool RequireConvert;
+    private bool disposedValue;
 
     private ST_DRAW_OBJECT()
     {
@@ -455,4 +458,25 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
 
     public bool Equals(ST_DRAW_OBJECT other) => other != null && ObjectName == other.ObjectName;
 
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                imageDX?.Dispose();
+                graphics?.Dispose();
+            }
+            imageDX = null;
+            imageDX = null;
+            graphics = null;
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }
