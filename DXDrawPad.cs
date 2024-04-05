@@ -70,8 +70,8 @@ public partial class DXDrawPad : UserControl
         oRenderTarget = new WindowRenderTarget(oDXFactory, new RenderTargetProperties(), _renderProp);
 
         mFPSDelay = 900 / mFPSSet;
-        AddDrawObject("FPS", 100, 20, 0, 0);
-        mObjFPSDraw = oDrawObjects["FPS"];
+        AddDrawObject(ST_DRAW_OBJECT.FPSKey, 100, 20, 0, 0);
+        mObjFPSDraw = oDrawObjects[ST_DRAW_OBJECT.FPSKey];
 
         tmrLoop.Enabled = true;
         GDIDrawPad_Resize(null, null);
@@ -400,10 +400,6 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
         if (objectName == string.Empty)
         {
             throw new ArgumentException("objectName是空字符串.", nameof(objectName));
-        }
-        if (objectName == FPSKey)
-        {
-            throw new ArgumentException("objectName的值是FPS展示层的Key。", nameof(objectName));
         }
     }
 
