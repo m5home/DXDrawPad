@@ -148,7 +148,7 @@ public partial class DXDrawPad : UserControl
         #region 绘制FPS
         if (mShowFPS)
         {
-            _FPSItem = oDrawObjects["FPS"];
+            _FPSItem = oDrawObjects[ST_DRAW_OBJECT.FPSKey];
             oRenderTarget.DrawBitmap(_FPSItem.imageDX, _FPSItem.RectDX, 1.0f, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
         }
         #endregion
