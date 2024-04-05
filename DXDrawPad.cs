@@ -27,73 +27,6 @@ using System.Windows.Forms;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 
-public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
-{
-    public static readonly ST_DRAW_OBJECT Default = new();
-
-    public readonly string ObjectName;
-    /// <summary>
-    /// 当前对象的GDI画布
-    /// </summary>
-    public Image imageGDI;
-    /// <summary>
-    /// 当前对象的DX图象
-    /// </summary>
-    public SharpDX.Direct2D1.Bitmap imageDX;
-    /// <summary>
-    /// 当前对象画布关联的Graphics对象
-    /// </summary>
-    public Graphics graphics;
-    /// <summary>
-    /// 当前画布要绘制在主画布上的坐标,中心原点
-    /// </summary>
-    public PointF LocationGDI;
-    /// <summary>
-    /// 当前画布要绘制在主画布上的区域,绝对坐标.
-    /// <para>由LocationGDI与imageGDI中的大小计算得来.</para>
-    /// </summary>
-    public RawRectangleF RectDX;
-    /// <summary>
-    /// 画布上绘制的对象默认颜色
-    /// </summary>
-    public Color color;
-    /// <summary>
-    /// 画布上绘制的对象被选中时的颜色
-    /// </summary>
-    public Color colorSelected;
-    /// <summary>
-    /// 画布上背景色
-    /// </summary>
-    public Color colorBack;
-    /// <summary>
-    /// 画布对象是否被选中
-    /// </summary>
-    public bool Selected;
-    /// <summary>
-    /// 当前对象是否需要从GDI转换为DX
-    /// </summary>
-    public bool RequireConvert;
-
-    private ST_DRAW_OBJECT()
-    {
-        ObjectName = string.Empty;
-    }
-
-    public ST_DRAW_OBJECT(string objectName)
-    {
-        ObjectName = objectName ?? throw new ArgumentNullException(nameof(objectName));
-    }
-
-    public override int GetHashCode() => ObjectName.GetHashCode();
-
-    public override bool Equals(object obj) => obj is ST_DRAW_OBJECT stObj && Equals(stObj);
-
-    public override string ToString() => $"{ObjectName}: {LocationGDI}";
-
-    public bool Equals(ST_DRAW_OBJECT other) => other != null && ObjectName == other.ObjectName;
-
-}
-
 /// <summary>
 /// 基于D2D的绘图控件.
 /// <para>总体思路:</para>
@@ -405,4 +338,71 @@ public partial class DXDrawPad : UserControl
 
     public RenderTarget RenderTarget => oRenderTarget;
     #endregion
+}
+
+public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
+{
+    public static readonly ST_DRAW_OBJECT Default = new();
+
+    public readonly string ObjectName;
+    /// <summary>
+    /// 当前对象的GDI画布
+    /// </summary>
+    public Image imageGDI;
+    /// <summary>
+    /// 当前对象的DX图象
+    /// </summary>
+    public SharpDX.Direct2D1.Bitmap imageDX;
+    /// <summary>
+    /// 当前对象画布关联的Graphics对象
+    /// </summary>
+    public Graphics graphics;
+    /// <summary>
+    /// 当前画布要绘制在主画布上的坐标,中心原点
+    /// </summary>
+    public PointF LocationGDI;
+    /// <summary>
+    /// 当前画布要绘制在主画布上的区域,绝对坐标.
+    /// <para>由LocationGDI与imageGDI中的大小计算得来.</para>
+    /// </summary>
+    public RawRectangleF RectDX;
+    /// <summary>
+    /// 画布上绘制的对象默认颜色
+    /// </summary>
+    public Color color;
+    /// <summary>
+    /// 画布上绘制的对象被选中时的颜色
+    /// </summary>
+    public Color colorSelected;
+    /// <summary>
+    /// 画布上背景色
+    /// </summary>
+    public Color colorBack;
+    /// <summary>
+    /// 画布对象是否被选中
+    /// </summary>
+    public bool Selected;
+    /// <summary>
+    /// 当前对象是否需要从GDI转换为DX
+    /// </summary>
+    public bool RequireConvert;
+
+    private ST_DRAW_OBJECT()
+    {
+        ObjectName = string.Empty;
+    }
+
+    public ST_DRAW_OBJECT(string objectName)
+    {
+        ObjectName = objectName ?? throw new ArgumentNullException(nameof(objectName));
+    }
+
+    public override int GetHashCode() => ObjectName.GetHashCode();
+
+    public override bool Equals(object obj) => obj is ST_DRAW_OBJECT stObj && Equals(stObj);
+
+    public override string ToString() => $"{ObjectName}: {LocationGDI}";
+
+    public bool Equals(ST_DRAW_OBJECT other) => other != null && ObjectName == other.ObjectName;
+
 }
