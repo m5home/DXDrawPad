@@ -272,14 +272,16 @@ public partial class DXDrawPad : UserControl
     /// <returns></returns>
     public bool UpdateDrawObject(ST_DRAW_OBJECT drawObject)
     {
-        if (oDrawObjects.TryGetValue(drawObject.ObjectName, out var obj) &&
-            !obj.IsSameInstance(drawObject))
+        if (oDrawObjects.TryGetValue(drawObject.ObjectName, out var obj))
         {
             lock (oDrawObjects)
             {
                 drawObject.RequireConvert = true;
-                oDrawObjects[drawObject.ObjectName] = drawObject;
-                obj.Dispose();
+                if (!obj.IsSameInstance(drawObject))
+                {
+                    oDrawObjects[drawObject.ObjectName] = drawObject;
+                    obj.Dispose();
+                }
             }
             return true;
         }
