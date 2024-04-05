@@ -42,7 +42,12 @@ public partial class DXDrawPad : UserControl
     Stream oGdiBmpStream = new MemoryStream();
 
     Control oInvoke;
-
+    /* todo: 将字典的Key转化为int，通过 String.GetHashCode() 获取。
+     * Dictionary 在使用 string 作为 Key 时，会通过二进制比较来确定是否相等。
+     * 相比之下，通过int比较，性能会有明显的提升。
+     * 但是此操作会影响到调用的难易度，需要封装，为了可读性考虑，此设计暂不实施。
+     *
+    */
     Dictionary<string, ST_DRAW_OBJECT> oDrawObjects = new Dictionary<string, ST_DRAW_OBJECT>();
     int mFpsCount = 0;
     ST_DRAW_OBJECT mObjFPSDraw;
@@ -368,8 +373,13 @@ public partial class DXDrawPad : UserControl
 
 public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
 {
+    /// <summary>
+    /// 默认的 <see cref="ST_DRAW_OBJECT"/> 实例。
+    /// </summary>
     public static readonly ST_DRAW_OBJECT Default = new();
-
+    /// <summary>
+    /// 统一使用GUID作为FPS的Key，避免和调用者添加的Key冲突。此Key由绘图板占用，调用者不应该使用此Key。
+    /// </summary>
     public static readonly string FPSKey = Guid.NewGuid().ToString();
 
     public readonly string ObjectName;
@@ -420,6 +430,16 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
         ObjectName = string.Empty;
     }
 
+    /// <summary>
+    /// 初始化 <see cref="ST_DRAW_OBJECT"/> 的新实例，并指定其 <see cref="ST_DRAW_OBJECT.ObjectName"/>.
+    /// </summary>
+    /// <param name="objectName"><see cref="ST_DRAW_OBJECT.ObjectName"/>, 用于作为此实例的Key.</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    /// <remarks>
+    /// <see cref="ST_DRAW_OBJECT.ObjectName"/> 作为内部字典的Key使用。
+    /// 使用构造函数同意赋值，可以避免此Key为 <c>null</c>.
+    /// </remarks>
     public ST_DRAW_OBJECT(string objectName)
     {
         ObjectName = objectName ?? throw new ArgumentNullException(nameof(objectName));
