@@ -29,6 +29,8 @@ using Image = System.Drawing.Image;
 
 public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
 {
+    public static readonly ST_DRAW_OBJECT Default = new();
+
     public readonly string ObjectName;
     /// <summary>
     /// 当前对象的GDI画布
@@ -71,6 +73,11 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>
     /// 当前对象是否需要从GDI转换为DX
     /// </summary>
     public bool RequireConvert;
+
+    private ST_DRAW_OBJECT()
+    {
+        ObjectName = string.Empty;
+    }
 
     public ST_DRAW_OBJECT(string objectName)
     {
@@ -318,7 +325,7 @@ public partial class DXDrawPad : UserControl
     /// <returns></returns>
     public bool GetDrawObject(string keyName, out ST_DRAW_OBJECT outDrawObject)
     {
-        return oDrawObjects.TryGetValue(keyName,out outDrawObject);
+        return oDrawObjects.TryGetValue(keyName, out outDrawObject);
     }
 
     /// <summary>
