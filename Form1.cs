@@ -12,17 +12,17 @@ namespace prjGDIDrawPad
 {
     public partial class Form1 : Form
     {
-        ST_DRAW_OBJECT mCirItem = new ST_DRAW_OBJECT();
-        ST_DRAW_OBJECT mPosMoveItem = new ST_DRAW_OBJECT();
-        ST_DRAW_OBJECT mPosItem = new ST_DRAW_OBJECT();
-        ST_DRAW_OBJECT mK_MoveItem = new ST_DRAW_OBJECT();
-        ST_DRAW_OBJECT mK_Item = new ST_DRAW_OBJECT();
-        ST_DRAW_OBJECT mTank_Item = new ST_DRAW_OBJECT();
-        ST_DRAW_OBJECT mLaser_Item = new ST_DRAW_OBJECT();
-        ST_DRAW_OBJECT mFFF_Item = new ST_DRAW_OBJECT();
-        ST_DRAW_OBJECT mBackImage = new ST_DRAW_OBJECT();
+        ST_DRAW_OBJECT mCirItem = ST_DRAW_OBJECT.Default;
+        ST_DRAW_OBJECT mPosMoveItem = ST_DRAW_OBJECT.Default;
+        ST_DRAW_OBJECT mPosItem = ST_DRAW_OBJECT.Default;
+        ST_DRAW_OBJECT mK_MoveItem = ST_DRAW_OBJECT.Default;
+        ST_DRAW_OBJECT mK_Item = ST_DRAW_OBJECT.Default;
+        ST_DRAW_OBJECT mTank_Item = ST_DRAW_OBJECT.Default;
+        ST_DRAW_OBJECT mLaser_Item = ST_DRAW_OBJECT.Default;
+        ST_DRAW_OBJECT mFFF_Item = ST_DRAW_OBJECT.Default;
+        ST_DRAW_OBJECT mBackImage = ST_DRAW_OBJECT.Default;
 
-        Font mFontNumber = new Font("Consolas", 9);
+        Font mFontNumber = new Font("YaHei", 9);
 
         cSharpDXImage oGif_K_Move;
         cSharpDXImage oGif_K;
@@ -36,18 +36,18 @@ namespace prjGDIDrawPad
             InitializeComponent();
 
             oGif_K_Move = new cSharpDXImage(dxDrawPad1.RenderTarget);
-	        oGif_K = new cSharpDXImage(dxDrawPad1.RenderTarget);
-	        oGif_Tank = new cSharpDXImage(dxDrawPad1.RenderTarget);
-	        oGif_Laser = new cSharpDXImage(dxDrawPad1.RenderTarget);
-	        oGif_FFF = new cSharpDXImage(dxDrawPad1.RenderTarget);
+            oGif_K = new cSharpDXImage(dxDrawPad1.RenderTarget);
+            oGif_Tank = new cSharpDXImage(dxDrawPad1.RenderTarget);
+            oGif_Laser = new cSharpDXImage(dxDrawPad1.RenderTarget);
+            oGif_FFF = new cSharpDXImage(dxDrawPad1.RenderTarget);
             oImageBack = new cSharpDXImage(dxDrawPad1.RenderTarget);
 
-			oGif_K_Move.Load(Application.StartupPath + @"\k-upper.gif");
+            oGif_K_Move.Load(Application.StartupPath + @"\k-upper.gif");
             oGif_K.Load(Application.StartupPath + @"\K站立.gif");
             oGif_Tank.Load(Application.StartupPath + @"\tank.gif");
             oGif_Laser.Load(Application.StartupPath + @"\laser.gif");
             oGif_FFF.Load(Application.StartupPath + @"\fff.gif");
-			oImageBack.Load(Application.StartupPath + @"\back.png");
+            oImageBack.Load(Application.StartupPath + @"\back.png");
 
             dxDrawPad1.IsShowFPS = true;
 
@@ -55,11 +55,11 @@ namespace prjGDIDrawPad
             dxDrawPad1.AddDrawObject("backimg", oImageBack.Size.Width, oImageBack.Size.Height, 0, 0, Color.Green, Color.Transparent, Color.Red);
             dxDrawPad1.GetDrawObject("backimg", out mBackImage);
 
-			mBackImage.graphics.Clear(mBackImage.colorBack);
-			mBackImage.graphics.DrawImage(oImageBack.GetNextImage(), 0, 0);
-			dxDrawPad1.UpdateDrawObject(mBackImage);
+            mBackImage.graphics.Clear(mBackImage.colorBack);
+            mBackImage.graphics.DrawImage(oImageBack.GetNextImage(), 0, 0);
+            dxDrawPad1.UpdateDrawObject(mBackImage);
 
-			dxDrawPad1.AddDrawObject("Cir", 200, 200, 100, 100, Color.Green, Color.Transparent, Color.Red);
+            dxDrawPad1.AddDrawObject("Cir", 200, 200, 100, 100, Color.Green, Color.Transparent, Color.Red);
             dxDrawPad1.GetDrawObject("Cir", out mCirItem);
 
             dxDrawPad1.AddDrawObject("PosMove", 200, 20, 0, 0, Color.Green, Color.Transparent, Color.Red);
@@ -100,11 +100,11 @@ namespace prjGDIDrawPad
             mCirItem.graphics.DrawLine(Pens.Red, 0, 0, 150, 150);
             mCirItem.graphics.DrawString("第一个子画布,在最下层", mFontNumber, Brushes.Black, 0, 100);
             dxDrawPad1.UpdateDrawObject(mCirItem);
-		}
+        }
 
-		private void dxDrawPad1_Load(object sender, EventArgs e)
-		{
-		}
+        private void dxDrawPad1_Load(object sender, EventArgs e)
+        {
+        }
 
         private void dxDrawPad1_MouseMove(object sender, MouseEventArgs e)
         {
@@ -128,76 +128,76 @@ namespace prjGDIDrawPad
             mLaser_Item.LocationGDI.X = e.X - mLaser_Item.imageGDI.Width;
             mLaser_Item.LocationGDI.Y = e.Y - mLaser_Item.imageGDI.Height;
 
-			dxDrawPad1.UpdateDrawObject(mLaser_Item);
+            dxDrawPad1.UpdateDrawObject(mLaser_Item);
             #endregion
 
             #region 飞机丢炸弹!!
             mFFF_Item.LocationGDI.X = e.X;
             mFFF_Item.LocationGDI.Y = e.Y + mFFF_Item.imageGDI.Height;
 
-			dxDrawPad1.UpdateDrawObject(mFFF_Item);
+            dxDrawPad1.UpdateDrawObject(mFFF_Item);
             #endregion
 
             #region 坦克!!
             mTank_Item.LocationGDI.X = e.X - mTank_Item.imageGDI.Width;
             mTank_Item.LocationGDI.Y = e.Y;
 
-			dxDrawPad1.UpdateDrawObject(mTank_Item);
+            dxDrawPad1.UpdateDrawObject(mTank_Item);
             #endregion
 
             #region 仅绘图,不更新画布位置,则不需要更新回去
             mPosItem.graphics.Clear(mPosItem.colorBack);
-            mPosItem.graphics.DrawString("固定的 - "+ e.Location.ToString(), mFontNumber, Brushes.Gold, 0, 0);
+            mPosItem.graphics.DrawString("固定的 - " + e.Location.ToString(), mFontNumber, Brushes.Gold, 0, 0);
 
             dxDrawPad1.UpdateDrawObject(mPosItem);
             #endregion
         }
 
-		#region gif动画的处理
-		private void timer1_Tick(object sender, EventArgs e)
+        #region gif动画的处理
+        private void timer1_Tick(object sender, EventArgs e)
         {
             mK_MoveItem.graphics.Clear(mK_MoveItem.colorBack);
             mK_MoveItem.graphics.DrawImage(oGif_K_Move.GetNextImage(), 0, 0);
-			dxDrawPad1.UpdateDrawObject(mK_MoveItem);
+            dxDrawPad1.UpdateDrawObject(mK_MoveItem);
 
-			timer1.Interval = oGif_K_Move.FrameDelay / 2;
+            timer1.Interval = oGif_K_Move.FrameDelay / 2;
         }
 
         private void timer2_Tick(object sender, EventArgs e)
         {
             mK_Item.graphics.Clear(mK_Item.colorBack);
             mK_Item.graphics.DrawImage(oGif_K.GetNextImage(), 0, 0);
-			dxDrawPad1.UpdateDrawObject(mK_Item);
+            dxDrawPad1.UpdateDrawObject(mK_Item);
 
-			timer2.Interval = oGif_K.FrameDelay / 2;
+            timer2.Interval = oGif_K.FrameDelay / 2;
         }
 
         private void timer3_Tick(object sender, EventArgs e)
         {
             mTank_Item.graphics.Clear(mTank_Item.colorBack);
             mTank_Item.graphics.DrawImage(oGif_Tank.GetNextImage(), 0, 0);
-			dxDrawPad1.UpdateDrawObject(mTank_Item);
+            dxDrawPad1.UpdateDrawObject(mTank_Item);
 
-			timer3.Interval = oGif_Tank.FrameDelay / 2;
+            timer3.Interval = oGif_Tank.FrameDelay / 2;
         }
 
         private void timer4_Tick(object sender, EventArgs e)
         {
             mLaser_Item.graphics.Clear(mLaser_Item.colorBack);
             mLaser_Item.graphics.DrawImage(oGif_Laser.GetNextImage(), 0, 0);
-			dxDrawPad1.UpdateDrawObject(mLaser_Item);
+            dxDrawPad1.UpdateDrawObject(mLaser_Item);
 
-			timer4.Interval = oGif_Laser.FrameDelay / 2;
+            timer4.Interval = oGif_Laser.FrameDelay / 2;
         }
 
         private void timer5_Tick(object sender, EventArgs e)
         {
             mFFF_Item.graphics.Clear(mFFF_Item.colorBack);
             mFFF_Item.graphics.DrawImage(oGif_FFF.GetNextImage(), 0, 0);
-			dxDrawPad1.UpdateDrawObject(mFFF_Item);
+            dxDrawPad1.UpdateDrawObject(mFFF_Item);
 
-			timer5.Interval = oGif_FFF.FrameDelay / 2;
+            timer5.Interval = oGif_FFF.FrameDelay / 2;
         }
-		#endregion
-	}
+        #endregion
+    }
 }
