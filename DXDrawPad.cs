@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -276,6 +277,31 @@ public partial class DXDrawPad : UserControl
         }
         return true;
     }
+
+    /// <summary>
+    /// 返回当前坐标所对应的 <see cref="ST_DRAW_OBJECT"/> 元素合集。
+    /// </summary>
+    /// <param name="point">当前的坐标。</param>
+    /// <returns>所有包含目标坐标的 <see cref="ST_DRAW_OBJECT"/> 实例。</returns>
+    public IEnumerable<ST_DRAW_OBJECT> GetDrawObjectAt(Point point)
+    {
+        ST_DRAW_OBJECT obj;
+        PointF itemPoint;
+        foreach (var item in oDrawObjects)
+        {
+            obj = item.Value;
+            itemPoint = obj.LocationGDI;
+            if (itemPoint.X <= point.X &&
+                itemPoint.Y <= point.Y &&
+                itemPoint.X + obj.imageGDI.Width >= point.X &&
+                 itemPoint.Y + obj.imageGDI.Height >= point.Y)
+            {
+                yield return obj;
+            }
+        }
+        yield break;
+    }
+
 
     #region 鼠标事件触发
     private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
