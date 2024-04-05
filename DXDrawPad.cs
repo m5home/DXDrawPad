@@ -272,11 +272,14 @@ public partial class DXDrawPad : UserControl
     /// <returns></returns>
     public bool UpdateDrawObject(ST_DRAW_OBJECT drawObject)
     {
-        if (oDrawObjects.TryGetValue(drawObject.ObjectName, out var obj))
+        if (oDrawObjects.TryGetValue(drawObject.ObjectName, out var obj) &&
+            !obj.IsSameInstance(drawObject))
         {
             lock (oDrawObjects)
             {
                 drawObject.RequireConvert = true;
+                oDrawObjects[drawObject.ObjectName] = drawObject;
+                obj.Dispose();
             }
             return true;
         }
@@ -467,6 +470,9 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>, IDisposable
             throw new ArgumentException("objectName是空字符串.", nameof(objectName));
         }
     }
+
+
+    public bool IsSameInstance(ST_DRAW_OBJECT other) => Object.ReferenceEquals(this, other);
 
     public override int GetHashCode() => ObjectName.GetHashCode();
 
