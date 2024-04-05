@@ -22,7 +22,7 @@ namespace prjGDIDrawPad
         ST_DRAW_OBJECT mFFF_Item = ST_DRAW_OBJECT.Default;
         ST_DRAW_OBJECT mBackImage = ST_DRAW_OBJECT.Default;
 
-        Font mFontNumber = new Font("Consolas", 9);
+        Font mFontNumber = new Font("YaHei", 9);
 
         cSharpDXImage oGif_K_Move;
         cSharpDXImage oGif_K;

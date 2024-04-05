@@ -52,7 +52,7 @@ public partial class DXDrawPad : UserControl
     int mFpsCount = 0;
     ST_DRAW_OBJECT mObjFPSDraw;
 
-    Font mFontNumber = new Font("Consolas", 10);
+    Font mFontNumber = new Font("YaHei", 10);
 
     int mFPS = 0, mFPSSet = 60;
     int mFPSDelay, mFPSTick;
