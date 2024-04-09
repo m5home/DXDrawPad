@@ -77,26 +77,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="cGIF_GDI.cs" />
-    <Compile Include="cSharpDXImage.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Class\cGIF_GDI.cs" />
+    <Compile Include="Class\cSharpDXImage.cs" />
+    <Compile Include="Form\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="Form\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="DXDrawPad.cs">
+    <Compile Include="Control\DXDrawPad.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DXDrawPad.Designer.cs">
+    <Compile Include="Control\DXDrawPad.Designer.cs">
       <DependentUpon>DXDrawPad.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
+    <EmbeddedResource Include="Form\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DXDrawPad.resx">
+    <EmbeddedResource Include="Control\DXDrawPad.resx">
       <DependentUpon>DXDrawPad.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -109,15 +109,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="packages.config" />
-    <None Include="packages\SharpDX.4.2.0\.signature.p7s" />
-    <None Include="packages\SharpDX.4.2.0\lib\uap10.0\SharpDX.pri" />
-    <None Include="packages\SharpDX.4.2.0\SharpDX.4.2.0.nupkg" />
-    <None Include="packages\SharpDX.Direct2D1.4.2.0\.signature.p7s" />
-    <None Include="packages\SharpDX.Direct2D1.4.2.0\lib\uap10.0\SharpDX.Direct2D1.pri" />
-    <None Include="packages\SharpDX.Direct2D1.4.2.0\SharpDX.Direct2D1.4.2.0.nupkg" />
-    <None Include="packages\SharpDX.DXGI.4.2.0\.signature.p7s" />
-    <None Include="packages\SharpDX.DXGI.4.2.0\lib\uap10.0\SharpDX.DXGI.pri" />
-    <None Include="packages\SharpDX.DXGI.4.2.0\SharpDX.DXGI.4.2.0.nupkg" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -132,42 +123,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages\SharpDX.4.2.0\lib\net40\.xml" />
-    <Content Include="packages\SharpDX.4.2.0\lib\net40\SharpDX.dll" />
-    <Content Include="packages\SharpDX.4.2.0\lib\net40\SharpDX.pdb" />
-    <Content Include="packages\SharpDX.4.2.0\lib\net45\.xml" />
-    <Content Include="packages\SharpDX.4.2.0\lib\net45\SharpDX.dll" />
-    <Content Include="packages\SharpDX.4.2.0\lib\net45\SharpDX.pdb" />
-    <Content Include="packages\SharpDX.4.2.0\lib\netstandard1.1\.xml" />
-    <Content Include="packages\SharpDX.4.2.0\lib\netstandard1.1\SharpDX.dll" />
-    <Content Include="packages\SharpDX.4.2.0\lib\netstandard1.1\SharpDX.pdb" />
-    <Content Include="packages\SharpDX.4.2.0\lib\uap10.0\.xml" />
-    <Content Include="packages\SharpDX.4.2.0\lib\uap10.0\SharpDX.dll" />
-    <Content Include="packages\SharpDX.4.2.0\lib\uap10.0\SharpDX.pdb" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\net40\SharpDX.Direct2D1.dll" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\net40\SharpDX.Direct2D1.pdb" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\net40\SharpDX.Direct2D1.xml" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\net45\SharpDX.Direct2D1.dll" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\net45\SharpDX.Direct2D1.pdb" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\net45\SharpDX.Direct2D1.xml" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\netstandard1.1\SharpDX.Direct2D1.dll" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\netstandard1.1\SharpDX.Direct2D1.pdb" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\netstandard1.1\SharpDX.Direct2D1.xml" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\uap10.0\SharpDX.Direct2D1.dll" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\uap10.0\SharpDX.Direct2D1.pdb" />
-    <Content Include="packages\SharpDX.Direct2D1.4.2.0\lib\uap10.0\SharpDX.Direct2D1.xml" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\net40\SharpDX.DXGI.dll" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\net40\SharpDX.DXGI.pdb" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\net40\SharpDX.DXGI.xml" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\net45\SharpDX.DXGI.dll" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\net45\SharpDX.DXGI.pdb" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\net45\SharpDX.DXGI.xml" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\netstandard1.1\SharpDX.DXGI.dll" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\netstandard1.1\SharpDX.DXGI.pdb" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\netstandard1.1\SharpDX.DXGI.xml" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\uap10.0\SharpDX.DXGI.dll" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\uap10.0\SharpDX.DXGI.pdb" />
-    <Content Include="packages\SharpDX.DXGI.4.2.0\lib\uap10.0\SharpDX.DXGI.xml" />
     <None Include="fff.gif">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
