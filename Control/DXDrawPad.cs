@@ -472,7 +472,7 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>, IDisposable
 				graphics?.Dispose();
 			}
 			imageDX = null;
-			imageDX = null;
+            imageGDI = null;
 			graphics = null;
 			disposedValue = true;
 		}
