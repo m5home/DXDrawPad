@@ -45,9 +45,9 @@ public partial class DXDrawPad : UserControl
      * 但是此操作会影响到调用的难易度，需要封装，为了可读性考虑，此设计暂不实施。
      *
     */
-	Dictionary<string, ST_DRAW_OBJECT> oDrawObjects = new Dictionary<string, ST_DRAW_OBJECT>();
+	Dictionary<string, cDrawObject> oDrawObjects = new Dictionary<string, cDrawObject>();
 	int mFpsCount = 0;
-	ST_DRAW_OBJECT mObjFPSDraw;
+	cDrawObject mObjFPSDraw;
 
 	Font mFontNumber = new Font("YaHei", 10);
 
@@ -73,8 +73,8 @@ public partial class DXDrawPad : UserControl
 		oRenderTarget = new WindowRenderTarget(oDXFactory, new RenderTargetProperties(), _renderProp);
 
 		mFPSDelay = 900 / mFPSSet;
-		AddDrawObject(ST_DRAW_OBJECT.FPSKey, 100, 20, 0, 0);
-		mObjFPSDraw = oDrawObjects[ST_DRAW_OBJECT.FPSKey];
+		AddDrawObject(cDrawObject.FPSKey, 100, 20, 0, 0);
+		mObjFPSDraw = oDrawObjects[cDrawObject.FPSKey];
 
 		tmrLoop.Enabled = true;
 		GDIDrawPad_Resize(null, null);
@@ -133,7 +133,7 @@ public partial class DXDrawPad : UserControl
 
 	private void DrawObjects()
 	{
-		ST_DRAW_OBJECT _FPSItem;
+		cDrawObject _FPSItem;
 		string[] _keys = oDrawObjects.Keys.ToArray();
 
 		#region 绘制用户对象
@@ -148,7 +148,7 @@ public partial class DXDrawPad : UserControl
 		foreach (var item in oDrawObjects)
 		{
 			oDrawObjects[item.Value.ObjectName].UpdateImageDX();
-			if (item.Value.ObjectName != ST_DRAW_OBJECT.FPSKey)
+			if (item.Value.ObjectName != cDrawObject.FPSKey)
 			{
 				oRenderTarget.DrawBitmap(item.Value.imageDX, item.Value.RectDX, 1.0f, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
 			}
@@ -157,7 +157,7 @@ public partial class DXDrawPad : UserControl
 		#region 绘制FPS
 		if (mShowFPS)
 		{
-			_FPSItem = oDrawObjects[ST_DRAW_OBJECT.FPSKey];
+			_FPSItem = oDrawObjects[cDrawObject.FPSKey];
 			oRenderTarget.DrawBitmap(_FPSItem.imageDX, _FPSItem.RectDX, 1.0f, SharpDX.Direct2D1.BitmapInterpolationMode.Linear);
 		}
 		#endregion
@@ -222,7 +222,7 @@ public partial class DXDrawPad : UserControl
 	/// <param name="selectedColor"></param>
 	public void AddDrawObject(string keyName, int width, int height, int objPosX, int objPosY, Color drawColor, Color backColor, Color selectedColor)
 	{
-		ST_DRAW_OBJECT _item = new ST_DRAW_OBJECT(keyName);
+		cDrawObject _item = new cDrawObject(keyName);
 
 		_item.initObject(oRenderTarget);
 		_item.imageGDI = new Bitmap(width, height);
@@ -248,7 +248,7 @@ public partial class DXDrawPad : UserControl
 	/// <param name="keyName"></param>
 	/// <param name="outDrawObject"></param>
 	/// <returns></returns>
-	public bool GetDrawObject(string keyName, out ST_DRAW_OBJECT outDrawObject)
+	public bool GetDrawObject(string keyName, out cDrawObject outDrawObject)
 	{
 		return oDrawObjects.TryGetValue(keyName, out outDrawObject);
 	}
@@ -258,7 +258,7 @@ public partial class DXDrawPad : UserControl
 	/// </summary>
 	/// <param name="drawObject"></param>
 	/// <returns></returns>
-	public bool UpdateDrawObject(ST_DRAW_OBJECT drawObject)
+	public bool UpdateDrawObject(cDrawObject drawObject)
 	{
 		if (oDrawObjects.TryGetValue(drawObject.ObjectName, out var obj))
 		{
@@ -277,13 +277,13 @@ public partial class DXDrawPad : UserControl
 	}
 
 	/// <summary>
-	/// 返回当前坐标所对应的 <see cref="ST_DRAW_OBJECT"/> 元素合集。
+	/// 返回当前坐标所对应的 <see cref="cDrawObject"/> 元素合集。
 	/// </summary>
 	/// <param name="point">当前的坐标。</param>
-	/// <returns>所有包含目标坐标的 <see cref="ST_DRAW_OBJECT"/> 实例。</returns>
-	public IEnumerable<ST_DRAW_OBJECT> GetDrawObjectAt(Point point)
+	/// <returns>所有包含目标坐标的 <see cref="cDrawObject"/> 实例。</returns>
+	public IEnumerable<cDrawObject> GetDrawObjectAt(Point point)
 	{
-		ST_DRAW_OBJECT obj;
+		cDrawObject obj;
 		PointF itemPoint;
 		foreach (var item in oDrawObjects)
 		{
@@ -364,12 +364,12 @@ public partial class DXDrawPad : UserControl
 	#endregion
 }
 
-public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>, IDisposable
+public class cDrawObject : IEquatable<cDrawObject>, IDisposable
 {
 	/// <summary>
-	/// 默认的 <see cref="ST_DRAW_OBJECT"/> 实例。
+	/// 默认的 <see cref="cDrawObject"/> 实例。
 	/// </summary>
-	public static readonly ST_DRAW_OBJECT Default = new();
+	public static readonly cDrawObject Default = new();
 	/// <summary>
 	/// 统一使用GUID作为FPS的Key，避免和调用者添加的Key冲突。此Key由绘图板占用，调用者不应该使用此Key。
 	/// </summary>
@@ -423,22 +423,22 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>, IDisposable
 	Stream oGdiBmpStream = new MemoryStream();
 	ImagingFactory oImagingFactory = new ImagingFactory();
 
-	private ST_DRAW_OBJECT()
+	private cDrawObject()
 	{
 		ObjectName = string.Empty;
 	}
 
 	/// <summary>
-	/// 初始化 <see cref="ST_DRAW_OBJECT"/> 的新实例，并指定其 <see cref="ST_DRAW_OBJECT.ObjectName"/>.
+	/// 初始化 <see cref="cDrawObject"/> 的新实例，并指定其 <see cref="cDrawObject.ObjectName"/>.
 	/// </summary>
-	/// <param name="objectName"><see cref="ST_DRAW_OBJECT.ObjectName"/>, 用于作为此实例的Key.</param>
+	/// <param name="objectName"><see cref="cDrawObject.ObjectName"/>, 用于作为此实例的Key.</param>
 	/// <exception cref="ArgumentNullException"></exception>
 	/// <exception cref="ArgumentException"></exception>
 	/// <remarks>
-	/// <see cref="ST_DRAW_OBJECT.ObjectName"/> 作为内部字典的Key使用。
+	/// <see cref="cDrawObject.ObjectName"/> 作为内部字典的Key使用。
 	/// 使用构造函数同意赋值，可以避免此Key为 <c>null</c>.
 	/// </remarks>
-	public ST_DRAW_OBJECT(string objectName)
+	public cDrawObject(string objectName)
 	{
 		ObjectName = objectName ?? throw new ArgumentNullException(nameof(objectName));
 		if (objectName == string.Empty)
@@ -452,15 +452,15 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>, IDisposable
 		this.oRenderTarget = objRenderTarget;
 	}
 
-	public bool IsSameInstance(ST_DRAW_OBJECT other) => Object.ReferenceEquals(this, other);
+	public bool IsSameInstance(cDrawObject other) => Object.ReferenceEquals(this, other);
 
 	public override int GetHashCode() => ObjectName.GetHashCode();
 
-	public override bool Equals(object obj) => obj is ST_DRAW_OBJECT stObj && Equals(stObj);
+	public override bool Equals(object obj) => obj is cDrawObject stObj && Equals(stObj);
 
 	public override string ToString() => $"{ObjectName}: {LocationGDI}";
 
-	public bool Equals(ST_DRAW_OBJECT other) => other != null && ObjectName == other.ObjectName;
+	public bool Equals(cDrawObject other) => other != null && ObjectName == other.ObjectName;
 
 	protected virtual void Dispose(bool disposing)
 	{
@@ -476,6 +476,11 @@ public class ST_DRAW_OBJECT : IEquatable<ST_DRAW_OBJECT>, IDisposable
 			graphics = null;
 			disposedValue = true;
 		}
+	}
+
+	public void UpdateDrawObject()
+	{
+		this.RequireConvert = true;
 	}
 
 	public void UpdateImageDX()

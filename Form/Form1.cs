@@ -12,15 +12,15 @@ namespace prjGDIDrawPad
 {
     public partial class Form1 : Form
     {
-        ST_DRAW_OBJECT mCirItem = ST_DRAW_OBJECT.Default;
-        ST_DRAW_OBJECT mPosMoveItem = ST_DRAW_OBJECT.Default;
-        ST_DRAW_OBJECT mPosItem = ST_DRAW_OBJECT.Default;
-        ST_DRAW_OBJECT mK_MoveItem = ST_DRAW_OBJECT.Default;
-        ST_DRAW_OBJECT mK_Item = ST_DRAW_OBJECT.Default;
-        ST_DRAW_OBJECT mTank_Item = ST_DRAW_OBJECT.Default;
-        ST_DRAW_OBJECT mLaser_Item = ST_DRAW_OBJECT.Default;
-        ST_DRAW_OBJECT mFFF_Item = ST_DRAW_OBJECT.Default;
-        ST_DRAW_OBJECT mBackImage = ST_DRAW_OBJECT.Default;
+        cDrawObject mCirItem = cDrawObject.Default;
+        cDrawObject mPosMoveItem = cDrawObject.Default;
+        cDrawObject mPosItem = cDrawObject.Default;
+        cDrawObject mK_MoveItem = cDrawObject.Default;
+        cDrawObject mK_Item = cDrawObject.Default;
+        cDrawObject mTank_Item = cDrawObject.Default;
+        cDrawObject mLaser_Item = cDrawObject.Default;
+        cDrawObject mFFF_Item = cDrawObject.Default;
+        cDrawObject mBackImage = cDrawObject.Default;
 
         Font mFontNumber = new Font("YaHei", 9);
 
@@ -57,7 +57,7 @@ namespace prjGDIDrawPad
 
             mBackImage.graphics.Clear(mBackImage.colorBack);
             mBackImage.graphics.DrawImage(oImageBack.GetNextImage(), 0, 0);
-			mBackImage.RequireConvert = true;
+            mBackImage.UpdateImageDX();
 
             dxDrawPad1.AddDrawObject("Cir", 200, 200, 100, 100, Color.Green, Color.Transparent, Color.Red);
             dxDrawPad1.GetDrawObject("Cir", out mCirItem);
@@ -99,7 +99,7 @@ namespace prjGDIDrawPad
             mCirItem.graphics.FillEllipse(Brushes.Yellow, 1, 1, 198, 198);
             mCirItem.graphics.DrawLine(Pens.Red, 0, 0, 150, 150);
             mCirItem.graphics.DrawString("第一个子画布,在最下层", mFontNumber, Brushes.Black, 0, 100);
-            mCirItem.RequireConvert = true;
+            mCirItem.UpdateDrawObject();
         }
 
         private void dxDrawPad1_Load(object sender, EventArgs e)
@@ -114,42 +114,42 @@ namespace prjGDIDrawPad
             mPosMoveItem.LocationGDI.X = e.Location.X;             //修改画布的位置
             mPosMoveItem.LocationGDI.Y = e.Location.Y + 20;
 
-            mPosMoveItem.RequireConvert = true;
+            mPosMoveItem.UpdateDrawObject();
             #endregion
 
             #region 防空的K!
             mK_MoveItem.LocationGDI.X = e.X;
             mK_MoveItem.LocationGDI.Y = e.Y;
 
-            mK_MoveItem.RequireConvert = true;
+            mK_MoveItem.UpdateDrawObject();
             #endregion
 
             #region 激光!!
             mLaser_Item.LocationGDI.X = e.X - mLaser_Item.imageGDI.Width;
             mLaser_Item.LocationGDI.Y = e.Y - mLaser_Item.imageGDI.Height;
 
-            mLaser_Item.RequireConvert = true;
+            mLaser_Item.UpdateDrawObject();
             #endregion
 
             #region 飞机丢炸弹!!
             mFFF_Item.LocationGDI.X = e.X;
             mFFF_Item.LocationGDI.Y = e.Y + mFFF_Item.imageGDI.Height;
 
-            mFFF_Item.RequireConvert = true;
+            mFFF_Item.UpdateDrawObject();
             #endregion
 
             #region 坦克!!
             mTank_Item.LocationGDI.X = e.X - mTank_Item.imageGDI.Width;
             mTank_Item.LocationGDI.Y = e.Y;
 
-            mTank_Item.RequireConvert = true;
+            mTank_Item.UpdateDrawObject();
             #endregion
 
             #region 仅绘图,不更新画布位置,则不需要更新回去
             mPosItem.graphics.Clear(mPosItem.colorBack);
             mPosItem.graphics.DrawString("固定的 - " + e.Location.ToString(), mFontNumber, Brushes.Gold, 0, 0);
 
-            mPosItem.RequireConvert = true;
+            mPosItem.UpdateDrawObject();
             #endregion
         }
 
@@ -158,7 +158,7 @@ namespace prjGDIDrawPad
         {
             mK_MoveItem.graphics.Clear(mK_MoveItem.colorBack);
             mK_MoveItem.graphics.DrawImage(oGif_K_Move.GetNextImage(), 0, 0);
-            mK_MoveItem.RequireConvert = true;
+            mK_MoveItem.UpdateDrawObject();
 
             timer1.Interval = oGif_K_Move.FrameDelay / 2;
         }
@@ -167,7 +167,7 @@ namespace prjGDIDrawPad
         {
             mK_Item.graphics.Clear(mK_Item.colorBack);
             mK_Item.graphics.DrawImage(oGif_K.GetNextImage(), 0, 0);
-            mK_Item.RequireConvert = true;
+            mK_Item.UpdateDrawObject();
 
             timer2.Interval = oGif_K.FrameDelay / 2;
         }
@@ -176,7 +176,7 @@ namespace prjGDIDrawPad
         {
             mTank_Item.graphics.Clear(mTank_Item.colorBack);
             mTank_Item.graphics.DrawImage(oGif_Tank.GetNextImage(), 0, 0);
-            mTank_Item.RequireConvert = true;
+            mTank_Item.UpdateDrawObject();
 
             timer3.Interval = oGif_Tank.FrameDelay / 2;
         }
@@ -185,7 +185,7 @@ namespace prjGDIDrawPad
         {
             mLaser_Item.graphics.Clear(mLaser_Item.colorBack);
             mLaser_Item.graphics.DrawImage(oGif_Laser.GetNextImage(), 0, 0);
-            mLaser_Item.RequireConvert = true;
+            mLaser_Item.UpdateDrawObject();
 
             timer4.Interval = oGif_Laser.FrameDelay / 2;
         }
@@ -194,7 +194,7 @@ namespace prjGDIDrawPad
         {
             mFFF_Item.graphics.Clear(mFFF_Item.colorBack);
             mFFF_Item.graphics.DrawImage(oGif_FFF.GetNextImage(), 0, 0);
-            mFFF_Item.RequireConvert = true;
+            mFFF_Item.UpdateDrawObject();
 
             timer5.Interval = oGif_FFF.FrameDelay / 2;
         }
