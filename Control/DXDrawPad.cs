@@ -566,23 +566,24 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
         int i = 0;
         unsafe
         {
-            uint* ptr = (uint*)bitmapData.Scan0.ToPointer();
-            uint* temp = stackalloc uint[4];
+            uint* src = (uint*)bitmapData.Scan0.ToPointer();
+            // 直接写入目标缓冲区，由于 SharpDX.Direct2D1.Bitmap 构造函数只关注起始指针。
+            // 所以不需要关注 DataStream 的坐标等属性。
+            // 这里使用 DataStream，只是基于性能考量。
+            uint* dest = (uint*)tempStream.DataPointer;
             while (remain >= 4)
             {
-                temp[0] = (ptr[i] & 0xFF00FF00) | ((ptr[i] >> 16) & 0xFF) | ((ptr[i] & 0xFF) << 16);
-                temp[1] = (ptr[i + 1] & 0xFF00FF00) | ((ptr[i + 1] >> 16) & 0xFF) | ((ptr[i + 2] & 0xFF) << 16);
-                temp[2] = (ptr[i + 2] & 0xFF00FF00) | ((ptr[i + 2] >> 16) & 0xFF) | ((ptr[i + 3] & 0xFF) << 16);
-                temp[3] = (ptr[i + 3] & 0xFF00FF00) | ((ptr[i + 3] >> 16) & 0xFF) | ((ptr[i + 4] & 0xFF) << 16);
+                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+                dest[i + 1] = (src[i + 1] & 0xFF00FF00) | ((src[i + 1] >> 16) & 0xFF) | ((src[i + 2] & 0xFF) << 16);
+                dest[i + 2] = (src[i + 2] & 0xFF00FF00) | ((src[i + 2] >> 16) & 0xFF) | ((src[i + 3] & 0xFF) << 16);
+                dest[i + 3] = (src[i + 3] & 0xFF00FF00) | ((src[i + 3] >> 16) & 0xFF) | ((src[i + 4] & 0xFF) << 16);
                 remain -= 4;
                 i += 4;
-                tempStream.Write((IntPtr)temp, 0, 4 * sizeof(int));
             }
             while (i < total)
             {
-                temp[0] = (ptr[i] & 0xFF00FF00) | ((ptr[i] >> 16) & 0xFF) | ((ptr[i] & 0xFF) << 16);
+                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
                 ++i;
-                tempStream.Write(temp[0]);
             }
         }
     }
