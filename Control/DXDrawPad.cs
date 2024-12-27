@@ -574,9 +574,9 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
             while (remain >= 4)
             {
                 dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
-                dest[i + 1] = (src[i + 1] & 0xFF00FF00) | ((src[i + 1] >> 16) & 0xFF) | ((src[i + 2] & 0xFF) << 16);
-                dest[i + 2] = (src[i + 2] & 0xFF00FF00) | ((src[i + 2] >> 16) & 0xFF) | ((src[i + 3] & 0xFF) << 16);
-                dest[i + 3] = (src[i + 3] & 0xFF00FF00) | ((src[i + 3] >> 16) & 0xFF) | ((src[i + 4] & 0xFF) << 16);
+                dest[i + 1] = (src[i + 1] & 0xFF00FF00) | ((src[i + 1] >> 16) & 0xFF) | ((src[i + 1] & 0xFF) << 16);
+                dest[i + 2] = (src[i + 2] & 0xFF00FF00) | ((src[i + 2] >> 16) & 0xFF) | ((src[i + 2] & 0xFF) << 16);
+                dest[i + 3] = (src[i + 3] & 0xFF00FF00) | ((src[i + 3] >> 16) & 0xFF) | ((src[i + 3] & 0xFF) << 16);
                 remain -= 4;
                 i += 4;
             }
