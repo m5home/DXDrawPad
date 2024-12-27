@@ -20,6 +20,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -528,5 +529,55 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
 		_FrameBitmap.Dispose();
 		_Decoder.Dispose();
 	}
+
+    /// <summary>
+    /// GDI的Bitmap转换到DX的Bitmap
+    /// </summary>
+    /// <remarks>
+	/// 相比于旧版本，此版本避免了一次转换所需的图像流复制，所以性能得到提升，
+	/// 同时还有以下潜在的好处：
+	/// <para>1.使用更高效的可复用非托管流 <see cref="DataStream"/>.</para>
+	/// 2.手动更改像素颜色信息以提供SIMD友好的代码支持。
+	/// <para>测试通过后，可以删除此类中的<see cref="oGdiBmpStream"/>字段。因为用不到了。</para>
+	/// </remarks>
+    private void ConvertGdiBitmap2()
+    {
+        System.Drawing.Bitmap bitmap = (System.Drawing.Bitmap)imageGDI;
+        int width = bitmap.Width;
+        int height = bitmap.Height;
+        System.Drawing.Rectangle sourceArea = new(0, 0, width, height);
+        BitmapProperties bitmapProperties = new(new SharpDX.Direct2D1.PixelFormat(SharpDX.DXGI.Format.R8G8B8A8_UNorm, AlphaMode.Premultiplied));
+        Size2 size = new(width, height);
+        int stride = width * sizeof(int);
+        using DataStream tempStream = new(height * stride, true, true);
+        BitmapData bitmapData = bitmap.LockBits(sourceArea, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+        int total = width * height;
+        int remain = total;
+        int i = 0;
+        unsafe
+        {
+            uint* ptr = (uint*)bitmapData.Scan0.ToPointer();
+            uint* temp = stackalloc uint[4];
+            while (remain >= 4)
+            {
+                temp[0] = (ptr[i] & 0xFF00FF00) | ((ptr[i] >> 16) & 0xFF) | ((ptr[i] & 0xFF) << 16);
+                temp[1] = (ptr[i + 1] & 0xFF00FF00) | ((ptr[i + 1] >> 16) & 0xFF) | ((ptr[i + 2] & 0xFF) << 16);
+                temp[2] = (ptr[i + 2] & 0xFF00FF00) | ((ptr[i + 2] >> 16) & 0xFF) | ((ptr[i + 3] & 0xFF) << 16);
+                temp[3] = (ptr[i + 3] & 0xFF00FF00) | ((ptr[i + 3] >> 16) & 0xFF) | ((ptr[i + 4] & 0xFF) << 16);
+                remain -= 4;
+                i += 4;
+                tempStream.Write((IntPtr)temp, 0, 4 * sizeof(int));
+            }
+            while (i < total)
+            {
+                temp[0] = (ptr[i] & 0xFF00FF00) | ((ptr[i] >> 16) & 0xFF) | ((ptr[i] & 0xFF) << 16);
+                ++i;
+                tempStream.Write(temp[0]);
+            }
+        }
+        bitmap.UnlockBits(bitmapData);
+        tempStream.Position = 0;
+        imageDX = new SharpDX.Direct2D1.Bitmap(oRenderTarget, size, tempStream, stride, bitmapProperties);
+    }
 
 }
