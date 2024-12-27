@@ -530,7 +530,6 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
         _Decoder.Dispose();
     }
 
-
     private static readonly BitmapProperties s_defaultBitmapProperties = new(new SharpDX.Direct2D1.PixelFormat(SharpDX.DXGI.Format.R8G8B8A8_UNorm, AlphaMode.Premultiplied));
     /// <summary>
     /// GDI的Bitmap转换到DX的Bitmap
@@ -559,6 +558,10 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
         imageDX = new SharpDX.Direct2D1.Bitmap(oRenderTarget, size, tempStream, stride, s_defaultBitmapProperties);
     }
 
+    // ConvertGdiBitmapCore ~ ConvertGdiBitmapCore5 是一系列赋值代码优化策略。
+    // 从理论上，以及经验上看，ConvertGdiBitmapCore 已经足够令人满意，无需引入并行化处理。
+    // 因为并行化处理存在着很大的开销，在图片较小的情况下，可能会抵消掉并行带来的优势。
+    // 但是，对于很大的图片，则可能有利用的价值。
     private void ConvertGdiBitmapCore(DataStream tempStream, BitmapData bitmapData)
     {
         int total = bitmapData.Width * bitmapData.Height;
@@ -585,6 +588,102 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
                 dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
                 ++i;
             }
+        }
+    }
+
+    // 余量并行化。
+    private void ConvertGdiBitmapCore2(DataStream tempStream, BitmapData bitmapData)
+    {
+        int total = bitmapData.Width * bitmapData.Height;
+        int remain = total;
+        int i = 0;
+        unsafe
+        {
+            uint* src = (uint*)bitmapData.Scan0.ToPointer();
+            uint* dest = (uint*)tempStream.DataPointer;
+            while (remain >= 4)
+            {
+                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+                dest[i + 1] = (src[i + 1] & 0xFF00FF00) | ((src[i + 1] >> 16) & 0xFF) | ((src[i + 1] & 0xFF) << 16);
+                dest[i + 2] = (src[i + 2] & 0xFF00FF00) | ((src[i + 2] >> 16) & 0xFF) | ((src[i + 2] & 0xFF) << 16);
+                dest[i + 3] = (src[i + 3] & 0xFF00FF00) | ((src[i + 3] >> 16) & 0xFF) | ((src[i + 3] & 0xFF) << 16);
+                remain -= 4;
+                i += 4;
+            }
+            Parallel.For(total - remain, total, j =>
+            {
+                dest[j] = (src[j] & 0xFF00FF00) | ((src[j] >> 16) & 0xFF) | ((src[j] & 0xFF) << 16);
+            });
+        }
+    }
+
+    // 主体并行化
+    private void ConvertGdiBitmapCore3(DataStream tempStream, BitmapData bitmapData)
+    {
+        int total = bitmapData.Width * bitmapData.Height;
+        int remain = total - total % 4;
+        unsafe
+        {
+            uint* src = (uint*)bitmapData.Scan0.ToPointer();
+            uint* dest = (uint*)tempStream.DataPointer;
+            if (total >= 4)
+            {
+                int sub = total / 4;
+                Parallel.For(0, sub, i =>
+                {
+                    int v = (i << 2);
+                    dest[v] = (src[v] & 0xFF00FF00) | ((src[v] >> 16) & 0xFF) | ((src[v] & 0xFF) << 16);
+                    dest[v + 1] = (src[v + 1] & 0xFF00FF00) | ((src[v + 1] >> 16) & 0xFF) | ((src[v + 1] & 0xFF) << 16);
+                    dest[v + 2] = (src[v + 2] & 0xFF00FF00) | ((src[v + 2] >> 16) & 0xFF) | ((src[v + 2] & 0xFF) << 16);
+                    dest[v + 3] = (src[v + 3] & 0xFF00FF00) | ((src[v + 3] >> 16) & 0xFF) | ((src[v + 3] & 0xFF) << 16);
+                });
+            }
+            for (int i = remain; i < total; i++)
+            {
+                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+            }
+        }
+    }
+
+    // 整体并行化
+    private void ConvertGdiBitmapCore4(DataStream tempStream, BitmapData bitmapData)
+    {
+        int total = bitmapData.Width * bitmapData.Height;
+        int remain = total - total % 4;
+        unsafe
+        {
+            uint* src = (uint*)bitmapData.Scan0.ToPointer();
+            uint* dest = (uint*)tempStream.DataPointer;
+            if (total >= 4)
+            {
+                int sub = total / 4;
+                Parallel.For(0, sub, i =>
+                {
+                    int v = (i << 2);
+                    dest[v] = (src[v] & 0xFF00FF00) | ((src[v] >> 16) & 0xFF) | ((src[v] & 0xFF) << 16);
+                    dest[v + 1] = (src[v + 1] & 0xFF00FF00) | ((src[v + 1] >> 16) & 0xFF) | ((src[v + 1] & 0xFF) << 16);
+                    dest[v + 2] = (src[v + 2] & 0xFF00FF00) | ((src[v + 2] >> 16) & 0xFF) | ((src[v + 2] & 0xFF) << 16);
+                    dest[v + 3] = (src[v + 3] & 0xFF00FF00) | ((src[v + 3] >> 16) & 0xFF) | ((src[v + 3] & 0xFF) << 16);
+                });
+            }
+            Parallel.For(remain, total, i =>
+            {
+                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+            });
+        }
+    }
+
+    // 纯并行
+    private void ConvertGdiBitmapCore5(DataStream tempStream, BitmapData bitmapData)
+    {
+        unsafe
+        {
+            uint* src = (uint*)bitmapData.Scan0.ToPointer();
+            uint* dest = (uint*)tempStream.DataPointer;
+            Parallel.For(0, bitmapData.Width * bitmapData.Height, i =>
+            {
+                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+            });
         }
     }
 
