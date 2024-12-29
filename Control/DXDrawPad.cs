@@ -11,17 +11,10 @@ using SharpDX.WIC;
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -374,8 +367,12 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
 	/// 统一使用GUID作为FPS的Key，避免和调用者添加的Key冲突。此Key由绘图板占用，调用者不应该使用此Key。
 	/// </summary>
 	public static readonly string FPSKey = Guid.NewGuid().ToString();
+	/// <summary>
+	/// 用于ARGB转换的只读属性配置
+	/// </summary>
+    private static readonly BitmapProperties s_defaultBitmapProperties = new(new SharpDX.Direct2D1.PixelFormat(SharpDX.DXGI.Format.R8G8B8A8_UNorm, AlphaMode.Premultiplied));
 
-	public readonly string ObjectName;
+    public readonly string ObjectName;
 	/// <summary>
 	/// 当前对象的GDI画布
 	/// </summary>
@@ -420,10 +417,8 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
 	private bool disposedValue;
 
 	WindowRenderTarget oRenderTarget;
-	Stream oGdiBmpStream = new MemoryStream();
-	ImagingFactory oImagingFactory = new ImagingFactory();
-
-	private cDrawObject()
+ 
+    private cDrawObject()
 	{
 		ObjectName = string.Empty;
 	}
@@ -505,28 +500,102 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	/// <summary>
-	/// GDI的Bitmap转换到DX的Bitmap
-	/// </summary>
-	/// <param name="objBitmapGDI"></param>
-	/// <returns></returns>
-	private void ConvertGdiBitmap()
-	{
-		imageDX?.Dispose();
+    /// <summary>
+    /// GDI的Bitmap转换到DX的Bitmap
+    /// </summary>
+    /// <remarks>
+	/// 相比于旧版本，此版本避免了一次转换所需的图像流复制，所以性能得到提升，
+	/// 同时还有以下潜在的好处：
+	/// <para>1.使用更高效的可复用非托管流 <see cref="DataStream"/>.</para>
+	/// 2.手动更改像素颜色信息以提供SIMD友好的代码支持。
+	/// </remarks>
+    private void ConvertGdiBitmap()
+    {
+        imageDX?.Dispose();
+        Bitmap bitmap = (Bitmap)imageGDI;
+        int width = bitmap.Width;
+        int height = bitmap.Height;
+        Rectangle sourceArea = new(0, 0, width, height);
+        Size2 size = new(width, height);
+        int stride = width * sizeof(int);
+        using DataStream tempStream = new(height * stride, true, true);
+        BitmapData bitmapData = bitmap.LockBits(sourceArea, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+        ConvertGdiBitmapCore(tempStream, bitmapData);
+        bitmap.UnlockBits(bitmapData);
+        tempStream.Position = 0;
+        imageDX = new SharpDX.Direct2D1.Bitmap(oRenderTarget, size, tempStream, stride, s_defaultBitmapProperties);
+    }
+    private void ConvertGdiBitmapCore(DataStream tempStream, BitmapData bitmapData)
+    {
 
-		oGdiBmpStream.Seek(0, SeekOrigin.Begin);
-		imageGDI.Save(oGdiBmpStream, ImageFormat.Png);
-		oGdiBmpStream.SetLength(oGdiBmpStream.Position);
-
-		BitmapDecoder _Decoder = new BitmapDecoder(oImagingFactory, oGdiBmpStream, DecodeOptions.CacheOnLoad);
-		BitmapFrameDecode _FrameBitmap = _Decoder.GetFrame(0);
-		FormatConverter _Converter = new FormatConverter(oImagingFactory);
-		_Converter.Initialize(_FrameBitmap, SharpDX.WIC.PixelFormat.Format32bppPBGRA);
-		imageDX = SharpDX.Direct2D1.Bitmap.FromWicBitmap(oRenderTarget, _Converter);
-
-		_Converter.Dispose();
-		_FrameBitmap.Dispose();
-		_Decoder.Dispose();
-	}
+        int total = bitmapData.Width * bitmapData.Height;
+        unsafe
+        {
+            uint* src = (uint*)bitmapData.Scan0.ToPointer();
+            // 直接写入目标缓冲区，由于 SharpDX.Direct2D1.Bitmap 构造函数只关注起始指针。
+            // 所以不需要关注 DataStream 的坐标等属性。
+            // 这里使用 DataStream，只是基于性能考量。
+            uint* dest = (uint*)tempStream.DataPointer;
+            //经过基准测试，当图片像素数量大于512*512时，并行化可以取得优势。
+            if (total >= 512 * 512)
+            {
+                ConvertGdiBitmapCoreParallel(total, src, dest);
+            }
+            else
+            {
+                ConvertGdiBitmapCoreSimd(total, src, dest);
+            }
+        }
+    }
+    private unsafe void ConvertGdiBitmapCoreSimd(int total, uint* src, uint* dest)
+    {
+        int remain = total;
+        int i = 0;
+        unsafe
+        {
+            while (remain >= 8)
+            {
+                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+                dest[i + 1] = (src[i + 1] & 0xFF00FF00) | ((src[i + 1] >> 16) & 0xFF) | ((src[i + 1] & 0xFF) << 16);
+                dest[i + 2] = (src[i + 2] & 0xFF00FF00) | ((src[i + 2] >> 16) & 0xFF) | ((src[i + 2] & 0xFF) << 16);
+                dest[i + 3] = (src[i + 3] & 0xFF00FF00) | ((src[i + 3] >> 16) & 0xFF) | ((src[i + 3] & 0xFF) << 16);
+                dest[i + 4] = (src[i + 4] & 0xFF00FF00) | ((src[i + 4] >> 16) & 0xFF) | ((src[i + 4] & 0xFF) << 16);
+                dest[i + 5] = (src[i + 5] & 0xFF00FF00) | ((src[i + 5] >> 16) & 0xFF) | ((src[i + 5] & 0xFF) << 16);
+                dest[i + 6] = (src[i + 6] & 0xFF00FF00) | ((src[i + 6] >> 16) & 0xFF) | ((src[i + 6] & 0xFF) << 16);
+                dest[i + 7] = (src[i + 7] & 0xFF00FF00) | ((src[i + 7] >> 16) & 0xFF) | ((src[i + 7] & 0xFF) << 16);
+                remain -= 8;
+                i += 8;
+            }
+            while (i < total)
+            {
+                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+                ++i;
+            }
+        }
+    }
+    private unsafe void ConvertGdiBitmapCoreParallel(int total, uint* src, uint* dest)
+    {
+        int remain = total - total % 8;
+        if (total >= 8)
+        {
+            int sub = total / 8;
+            Parallel.For(0, sub, i =>
+            {
+                int v = (i << 3);
+                dest[v] = (src[v] & 0xFF00FF00) | ((src[v] >> 16) & 0xFF) | ((src[v] & 0xFF) << 16);
+                dest[v + 1] = (src[v + 1] & 0xFF00FF00) | ((src[v + 1] >> 16) & 0xFF) | ((src[v + 1] & 0xFF) << 16);
+                dest[v + 2] = (src[v + 2] & 0xFF00FF00) | ((src[v + 2] >> 16) & 0xFF) | ((src[v + 2] & 0xFF) << 16);
+                dest[v + 3] = (src[v + 3] & 0xFF00FF00) | ((src[v + 3] >> 16) & 0xFF) | ((src[v + 3] & 0xFF) << 16);
+                dest[v + 4] = (src[v + 4] & 0xFF00FF00) | ((src[v + 4] >> 16) & 0xFF) | ((src[v + 4] & 0xFF) << 16);
+                dest[v + 5] = (src[v + 5] & 0xFF00FF00) | ((src[v + 5] >> 16) & 0xFF) | ((src[v + 5] & 0xFF) << 16);
+                dest[v + 6] = (src[v + 6] & 0xFF00FF00) | ((src[v + 6] >> 16) & 0xFF) | ((src[v + 6] & 0xFF) << 16);
+                dest[v + 7] = (src[v + 7] & 0xFF00FF00) | ((src[v + 7] >> 16) & 0xFF) | ((src[v + 7] & 0xFF) << 16);
+            });
+        }
+        Parallel.For(remain, total, i =>
+        {
+            dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+        });
+    }
 
 }
