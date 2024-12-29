@@ -553,18 +553,36 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
         int i = 0;
         unsafe
         {
-            while (remain >= 8)
+            if (IntPtr.Size == 8)
             {
-                dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
-                dest[i + 1] = (src[i + 1] & 0xFF00FF00) | ((src[i + 1] >> 16) & 0xFF) | ((src[i + 1] & 0xFF) << 16);
-                dest[i + 2] = (src[i + 2] & 0xFF00FF00) | ((src[i + 2] >> 16) & 0xFF) | ((src[i + 2] & 0xFF) << 16);
-                dest[i + 3] = (src[i + 3] & 0xFF00FF00) | ((src[i + 3] >> 16) & 0xFF) | ((src[i + 3] & 0xFF) << 16);
-                dest[i + 4] = (src[i + 4] & 0xFF00FF00) | ((src[i + 4] >> 16) & 0xFF) | ((src[i + 4] & 0xFF) << 16);
-                dest[i + 5] = (src[i + 5] & 0xFF00FF00) | ((src[i + 5] >> 16) & 0xFF) | ((src[i + 5] & 0xFF) << 16);
-                dest[i + 6] = (src[i + 6] & 0xFF00FF00) | ((src[i + 6] >> 16) & 0xFF) | ((src[i + 6] & 0xFF) << 16);
-                dest[i + 7] = (src[i + 7] & 0xFF00FF00) | ((src[i + 7] >> 16) & 0xFF) | ((src[i + 7] & 0xFF) << 16);
-                remain -= 8;
-                i += 8;
+                ulong* s = (ulong*)src;
+                ulong* d = (ulong*)dest;
+                while (remain >= 8)
+                {
+                    d[i] = (s[i] & 0xFF00FF00FF00FF00) | ((s[i] >> 16) & 0x000000FF000000FF) | ((s[i] & 0x000000FF000000FFF) << 16);
+                    d[i + 1] = (s[i + 1] & 0xFF00FF00FF00FF00) | ((s[i + 1] >> 16) & 0x000000FF000000FF) | ((s[i + 1] & 0x000000FF000000FF) << 16);
+                    d[i + 2] = (s[i + 2] & 0xFF00FF00FF00FF00) | ((s[i + 2] >> 16) & 0x000000FF000000FF) | ((s[i + 2] & 0x000000FF000000FF) << 16);
+                    d[i + 3] = (s[i + 3] & 0xFF00FF00FF00FF00) | ((s[i + 3] >> 16) & 0x000000FF000000FF) | ((s[i + 3] & 0x000000FF000000FF) << 16);
+                    remain -= 8;
+                    i += 4;
+                }
+                i <<= 1;
+            }
+            else
+            {
+                while (remain >= 8)
+                {
+                    dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
+                    dest[i + 1] = (src[i + 1] & 0xFF00FF00) | ((src[i + 1] >> 16) & 0xFF) | ((src[i + 1] & 0xFF) << 16);
+                    dest[i + 2] = (src[i + 2] & 0xFF00FF00) | ((src[i + 2] >> 16) & 0xFF) | ((src[i + 2] & 0xFF) << 16);
+                    dest[i + 3] = (src[i + 3] & 0xFF00FF00) | ((src[i + 3] >> 16) & 0xFF) | ((src[i + 3] & 0xFF) << 16);
+                    dest[i + 4] = (src[i + 4] & 0xFF00FF00) | ((src[i + 4] >> 16) & 0xFF) | ((src[i + 4] & 0xFF) << 16);
+                    dest[i + 5] = (src[i + 5] & 0xFF00FF00) | ((src[i + 5] >> 16) & 0xFF) | ((src[i + 5] & 0xFF) << 16);
+                    dest[i + 6] = (src[i + 6] & 0xFF00FF00) | ((src[i + 6] >> 16) & 0xFF) | ((src[i + 6] & 0xFF) << 16);
+                    dest[i + 7] = (src[i + 7] & 0xFF00FF00) | ((src[i + 7] >> 16) & 0xFF) | ((src[i + 7] & 0xFF) << 16);
+                    remain -= 8;
+                    i += 8;
+                }
             }
             while (i < total)
             {
@@ -575,27 +593,41 @@ public class cDrawObject : IEquatable<cDrawObject>, IDisposable
     }
     private unsafe void ConvertGdiBitmapCoreParallel(int total, uint* src, uint* dest)
     {
-        int remain = total - total % 8;
         if (total >= 8)
         {
             int sub = total / 8;
-            Parallel.For(0, sub, i =>
+            if (IntPtr.Size == 8)
             {
-                int v = (i << 3);
-                dest[v] = (src[v] & 0xFF00FF00) | ((src[v] >> 16) & 0xFF) | ((src[v] & 0xFF) << 16);
-                dest[v + 1] = (src[v + 1] & 0xFF00FF00) | ((src[v + 1] >> 16) & 0xFF) | ((src[v + 1] & 0xFF) << 16);
-                dest[v + 2] = (src[v + 2] & 0xFF00FF00) | ((src[v + 2] >> 16) & 0xFF) | ((src[v + 2] & 0xFF) << 16);
-                dest[v + 3] = (src[v + 3] & 0xFF00FF00) | ((src[v + 3] >> 16) & 0xFF) | ((src[v + 3] & 0xFF) << 16);
-                dest[v + 4] = (src[v + 4] & 0xFF00FF00) | ((src[v + 4] >> 16) & 0xFF) | ((src[v + 4] & 0xFF) << 16);
-                dest[v + 5] = (src[v + 5] & 0xFF00FF00) | ((src[v + 5] >> 16) & 0xFF) | ((src[v + 5] & 0xFF) << 16);
-                dest[v + 6] = (src[v + 6] & 0xFF00FF00) | ((src[v + 6] >> 16) & 0xFF) | ((src[v + 6] & 0xFF) << 16);
-                dest[v + 7] = (src[v + 7] & 0xFF00FF00) | ((src[v + 7] >> 16) & 0xFF) | ((src[v + 7] & 0xFF) << 16);
-            });
+                ulong* s = (ulong*)src;
+                ulong* d = (ulong*)dest;
+                Parallel.For(0, sub, i =>
+                {
+                    int v = (i << 2);
+                    d[v] = (s[v] & 0xFF00FF00FF00FF00) | ((s[v] >> 16) & 0x000000FF000000FF) | ((s[v] & 0x000000FF000000FF) << 16);
+                    d[v + 1] = (s[v + 1] & 0xFF00FF00FF00FF00) | ((s[v + 1] >> 16) & 0x000000FF000000FF) | ((s[v + 1] & 0x000000FF000000FF) << 16);
+                    d[v + 2] = (s[v + 2] & 0xFF00FF00FF00FF00) | ((s[v + 2] >> 16) & 0x000000FF000000FF) | ((s[v + 2] & 0x000000FF000000FF) << 16);
+                    d[v + 3] = (s[v + 3] & 0xFF00FF00FF00FF00) | ((s[v + 3] >> 16) & 0x000000FF000000FF) | ((s[v + 3] & 0x000000FF000000FF) << 16);
+                });
+            }
+            else
+            {
+                Parallel.For(0, sub, i =>
+                {
+                    int v = (i << 3);
+                    dest[v] = (src[v] & 0xFF00FF00) | ((src[v] >> 16) & 0xFF) | ((src[v] & 0xFF) << 16);
+                    dest[v + 1] = (src[v + 1] & 0xFF00FF00) | ((src[v + 1] >> 16) & 0xFF) | ((src[v + 1] & 0xFF) << 16);
+                    dest[v + 2] = (src[v + 2] & 0xFF00FF00) | ((src[v + 2] >> 16) & 0xFF) | ((src[v + 2] & 0xFF) << 16);
+                    dest[v + 3] = (src[v + 3] & 0xFF00FF00) | ((src[v + 3] >> 16) & 0xFF) | ((src[v + 3] & 0xFF) << 16);
+                    dest[v + 4] = (src[v + 4] & 0xFF00FF00) | ((src[v + 4] >> 16) & 0xFF) | ((src[v + 4] & 0xFF) << 16);
+                    dest[v + 5] = (src[v + 5] & 0xFF00FF00) | ((src[v + 5] >> 16) & 0xFF) | ((src[v + 5] & 0xFF) << 16);
+                    dest[v + 6] = (src[v + 6] & 0xFF00FF00) | ((src[v + 6] >> 16) & 0xFF) | ((src[v + 6] & 0xFF) << 16);
+                    dest[v + 7] = (src[v + 7] & 0xFF00FF00) | ((src[v + 7] >> 16) & 0xFF) | ((src[v + 7] & 0xFF) << 16);
+                });
+            }
         }
-        Parallel.For(remain, total, i =>
+        Parallel.For(total - total % 8, total, i =>
         {
             dest[i] = (src[i] & 0xFF00FF00) | ((src[i] >> 16) & 0xFF) | ((src[i] & 0xFF) << 16);
         });
     }
-
 }
